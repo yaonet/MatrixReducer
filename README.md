@@ -2,6 +2,10 @@
 
 一个基于 WPF 的矩阵行化简工具，可将输入矩阵通过初等行变换化简为**阶梯形矩阵 (REF)** 和**简化阶梯形矩阵 (RREF)**，并展示每一步的详细过程。
 
+## 截图
+
+![软件截图](mr.png)
+
 ## 功能
 
 - 输入任意大小的矩阵（1×1 ~ 10×10）
@@ -20,8 +24,7 @@
 ## 运行
 
 ```bash
-cd MatrixReducer
-dotnet run
+dotnet run --project src/MatrixReducer
 ```
 
 ## 输入格式
@@ -48,12 +51,20 @@ dotnet run
 
 ```
 MatrixReducer/
-├── Fraction.cs            # 分数类型，精确有理数运算
-├── MatrixOperations.cs    # 行化简算法（REF / RREF）
-├── MainViewModel.cs       # ViewModel，数据绑定与业务逻辑
-├── MainWindow.xaml         # UI 布局
-├── MainWindow.xaml.cs      # 事件处理
-└── MatrixReducer.csproj    # 项目文件
+├── MatrixReducer.slnx                      # 解决方案文件
+├── src/
+│   └── MatrixReducer/
+│       ├── MatrixReducer.csproj            # WPF 项目文件
+│       ├── Fraction.cs                     # 分数类型，精确有理数运算
+│       ├── MatrixOperations.cs             # 行化简算法（REF / RREF）
+│       ├── MainViewModel.cs                # ViewModel，数据绑定与业务逻辑
+│       ├── MainWindow.xaml                 # UI 布局
+│       └── MainWindow.xaml.cs              # 事件处理
+└── tests/
+    └── MatrixReducer.Tests/
+        ├── MatrixReducer.Tests.csproj      # 测试项目文件
+        ├── FractionTests.cs                # Fraction 单元测试
+        └── MatrixOperationsTests.cs        # 行化简算法单元测试
 ```
 
 ## 算法说明

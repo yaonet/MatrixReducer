@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MatrixReducer/MatrixReducer.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MatrixReducer.Tests/MatrixReducer.Tests.csproj" />
+  </Folder>
+</Solution>
