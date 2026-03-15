@@ -1,0 +1,240 @@
+<Window x:Class="MatrixReducer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MatrixReducer"
+        mc:Ignorable="d"
+        Title="矩阵行化简工具 - REF / RREF" 
+        Height="720" Width="1000"
+        MinHeight="600" MinWidth="800"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5">
+
+    <Window.Resources>
+        <Style x:Key="HeaderText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#333"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+        <Style x:Key="MatrixBox" TargetType="TextBox">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="BorderBrush" Value="#CCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style x:Key="ResultBox" TargetType="TextBox">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="BorderBrush" Value="#CCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="#FAFAFA"/>
+            <Setter Property="TextWrapping" Value="NoWrap"/>
+            <Setter Property="HorizontalScrollBarVisibility" Value="Auto"/>
+        </Style>
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="Background" Value="#4A90D9"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="4" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#357ABD"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#2A5F9E"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="SmallButton" TargetType="Button">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Background" Value="#E8E8E8"/>
+            <Setter Property="Foreground" Value="#444"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="3" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#D0D0D0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 标题栏 -->
+        <Border Grid.Row="0" Background="#4A90D9" CornerRadius="6" Padding="16,12" Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock Text="矩阵行化简工具" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="行阶梯形 (REF) 与 简化行阶梯形 (RREF)" FontSize="12" Foreground="#D0E0F0" Margin="0,2,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 主体内容 -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320" MinWidth="250"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 左侧: 输入区域 -->
+            <Border Grid.Column="0" Background="White" CornerRadius="6" Padding="14" 
+                    BorderBrush="#DDD" BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 矩阵大小设置 -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                        <TextBlock Text="矩阵大小" Style="{StaticResource HeaderText}"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="行:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                            <TextBox x:Name="RowsBox" Text="{Binding Rows, UpdateSourceTrigger=PropertyChanged}" 
+                                     Width="45" TextAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="  列:" VerticalAlignment="Center" Margin="6,0,4,0"/>
+                            <TextBox x:Name="ColsBox" Text="{Binding Cols, UpdateSourceTrigger=PropertyChanged}" 
+                                     Width="45" TextAlignment="Center" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- 示例 -->
+                    <StackPanel Grid.Row="1" Margin="0,0,0,10">
+                        <TextBlock Text="示例矩阵" Style="{StaticResource HeaderText}"/>
+                        <WrapPanel>
+                            <Button Content="3×4 示例1" Style="{StaticResource SmallButton}" Click="Example_Click" Tag="0"/>
+                            <Button Content="3×4 示例2" Style="{StaticResource SmallButton}" Click="Example_Click" Tag="1"/>
+                            <Button Content="3×3 方程组" Style="{StaticResource SmallButton}" Click="Example_Click" Tag="2"/>
+                            <Button Content="单位矩阵" Style="{StaticResource SmallButton}" Click="Example_Click" Tag="3"/>
+                            <Button Content="奇异矩阵" Style="{StaticResource SmallButton}" Click="Example_Click" Tag="4"/>
+                        </WrapPanel>
+                    </StackPanel>
+
+                    <!-- 输入说明 -->
+                    <TextBlock Grid.Row="2" Style="{StaticResource HeaderText}" Text="输入矩阵（空格或逗号分隔，每行一行）"/>
+
+                    <!-- 矩阵输入 -->
+                    <TextBox Grid.Row="3"
+                             Style="{StaticResource MatrixBox}"
+                             Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
+                             AcceptsReturn="True"
+                             TextWrapping="NoWrap"
+                             VerticalScrollBarVisibility="Auto"
+                             HorizontalScrollBarVisibility="Auto"
+                             VerticalAlignment="Stretch"/>
+
+                    <!-- 按钮 -->
+                    <Button Grid.Row="4" Content="行 化 简" 
+                            Style="{StaticResource ActionButton}" 
+                            Click="Reduce_Click" 
+                            Margin="0,12,0,0"
+                            HorizontalAlignment="Stretch"/>
+                </Grid>
+            </Border>
+
+            <GridSplitter Grid.Column="1" Width="6" Background="Transparent" 
+                          HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+
+            <!-- 右侧: 结果区域 -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- REF 结果 -->
+                <Border Grid.Row="0" Background="White" CornerRadius="6" Padding="14" 
+                        BorderBrush="#DDD" BorderThickness="1" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource HeaderText}">
+                            <Run Text="阶梯形矩阵" FontWeight="Bold"/>
+                            <Run Text=" (Row Echelon Form)" Foreground="#888" FontSize="11"/>
+                        </TextBlock>
+                        <TextBox Style="{StaticResource ResultBox}"
+                                 Text="{Binding RefResult, Mode=OneWay}"
+                                 MinHeight="60" MaxHeight="160"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- RREF 结果 -->
+                <Border Grid.Row="1" Background="White" CornerRadius="6" Padding="14" 
+                        BorderBrush="#DDD" BorderThickness="1" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource HeaderText}">
+                            <Run Text="简化阶梯形矩阵" FontWeight="Bold"/>
+                            <Run Text=" (Reduced Row Echelon Form)" Foreground="#888" FontSize="11"/>
+                        </TextBlock>
+                        <TextBox Style="{StaticResource ResultBox}"
+                                 Text="{Binding RrefResult, Mode=OneWay}"
+                                 MinHeight="60" MaxHeight="160"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 详细步骤 -->
+                <Border Grid.Row="2" Background="White" CornerRadius="6" Padding="14" 
+                        BorderBrush="#DDD" BorderThickness="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Style="{StaticResource HeaderText}" Text="详细化简步骤"/>
+                        <TextBox Grid.Row="1"
+                                 Style="{StaticResource ResultBox}"
+                                 Text="{Binding StepsText, Mode=OneWay}"
+                                 VerticalScrollBarVisibility="Auto"
+                                 HorizontalScrollBarVisibility="Auto"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- 状态栏 -->
+        <Border Grid.Row="2" Background="#E8E8E8" CornerRadius="4" Padding="10,6" Margin="0,8,0,0">
+            <TextBlock Text="{Binding StatusText}" FontSize="12" Foreground="#555"/>
+        </Border>
+    </Grid>
+</Window>
